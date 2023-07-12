@@ -1,17 +1,98 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" style="background-color: lightgrey">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
-  <title>Vanilla JavaScript App</title>
+  <link rel="stylesheet" href="semantic.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+  
+  <title>DCPS Parental Rights in Education</title>
 </head>
 
 <body>
-  <main>
-    <h1>Vanilla JavaScript Appz</h1>
-  </main>
-</body>
+  <div class="ui container" style="background-color: white; padding-left: 10px; padding-right: 10px; padding-bottom: 10px; padding-top: 0px">
+    <div id="TheLandingGrid" class="ui grid" style="display: flex">      
+      
+      <div class="row">
+        <div id="bigConcern" class="sixteen wide column">
+          
 
+            <fieldset id="fsConcern" class="border p-2" style="height: auto; position: relative;">
+                <div id="overConcernTable" class="ui grid" style="display: block;">
+                    <div class="row">
+                        <div class="four wide column">
+                            &nbsp;&nbsp;Show <select id="selConcernPageSize" onchange="ReloadConcernTable(true)">
+                                    <option>10</option>
+                                    <option>25</option>
+                                    <option>50</option>
+                                    <option>100</option>
+                                </select> entries 
+                        </div>
+                        <div class="eight wide column" style="display: flex">
+                            <a href="#" onclick="AdjustConcernSort()"><i style="display: block; width: 20%" id="iSearchValue" class="fas fa-lg"></i></a>&nbsp;&nbsp;
+                            <input id="searchValConcern" type="text" placeholder="Search Status" style="display: block; width: 60%; border-radius: 3px" onkeyup="KeyupSearchConcern(window.event.keyCode, this.value);"/>&nbsp;
+                            <button id="SearchConcern" class="btn btn-outline-primary" style="display: block;" type="button" onclick="ReloadConcernTable(true)">Search Status</button>
+                        </div>
+                        <div class="four wide column" style="text-align: right">
+                            <div id="ConcernTotalItems"></div>
+                        </div>
+                    </div>                
+                </div>
+                <hr />
+                <table id="dataTableConcern" class="display" style="width:100%">
+                    <thead>
+                        <tr id="heads">
+                            <th style="width: 20px"></th>
+                            <th style="text-align: left"><a id="chkId" data-type="date" data-field="$[Form]_.SubmittedTime" href="#" onclick="dataTableConcernSort(this)">Concern #</a></th>
+                            <th style="text-align: left"><a id="chkDateSubmitted" data-type="date" data-field="$[Form]_.SubmittedTime" href="#" onclick="dataTableConcernSort(this)">Date Submitted</a></th>
+                            <th style="text-align: left"><a id="chkSchoolName" data-type="text" data-field="$[Form]_.Student.SchoolName" href="#" onclick="dataTableConcernSort(this)">School</a></th>
+                            <th style="text-align: left"><a id="chkStudentName" data-type="text" data-field="$[Form]_.Student.GradeLevel" href="#" onclick="dataTableConcernSort(this)">Student Name</a></th>
+                            <th style="text-align: left"><a id="chkStudentId" data-type="text" data-field="$[Form]_.Student.Id" href="#" onclick="dataTableConcernSort(this)">Student Id</a></th>
+                            <th style="text-align: left"><a id="chkStatus" data-type="text" data-field="$[Status]_.State" href="#" onclick="dataTableConcernSort(this)"><span style="color: red" data-value="!is_null($[Status]_.State, 'Pending')" data-field="$[Status]_.State">Status</span></a></th>
+                            <th style="text-align: left"><a id="chkDaysRemaining" data-type="text" data-field="$[Status]_.State" href="#" onclick="dataTableConcernSort(this)">Days Remaining</span></a></th>
+                          </tr>
+                    </thead>
+                </table><br />
+                <div id="underConcernTable" class="ui grid" style="display: none">
+                    <div class="row">
+                        <div id="ConcernCount" class="eight wide column">                        
+                        </div>
+                        <div id="ConcernNavigation" class="eight wide column" style="display: none; text-align: right">                
+                            <button id="btnConcernFirst" type="button" class="btn btn-secondary" onclick="ConcernPageClick('Concern', 'First')">First</button>&nbsp;&nbsp;
+                            <button id="btnConcernPrevious" type="button" class="btn btn-secondary" onclick="ConcernPageClick('Concern', 'Previous')">Previous</button>&nbsp;&nbsp;
+                            <button id="btnConcernNext" type="button" class="btn btn-primary" onclick="ConcernPageClick('Concern', 'Next')">Next</button>&nbsp;&nbsp;
+                        </div>
+                    </div>
+                </div>    
+            </fieldset>
+
+
+        </div>  
+      </div>
+    </div>
+  </div>
+</body>
+<dialog id="dialog" style="position: absolute; top: 50%">
+  <div id="LoaderTitle">Loading Data</div>
+    <div class="ui segment" style="width: 300px; height: 80px">
+    <div class="ui active inverted dimmer">
+      <div id="LoaderMessage" class="ui indeterminate text loader">Loading...</div>
+    </div>
+    <p></p>
+  </div>
+</dialog>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="https://dcps-core-api-dev.azurewebsites.net/scriptlibrary/jrapi.js"></script>    
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.js"></script>
+<script src="script/semantic.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="script/app.js"></script>
+<script src="script/datatable.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>window.onload=ReadySetGo();</script>
 </html>
