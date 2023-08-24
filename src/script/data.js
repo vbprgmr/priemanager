@@ -4,7 +4,16 @@ function CallJrapiPRIE(endPoint, id1, id2, id3, id4, id5) {
 
     if (endPoint === "peoplepicker") {
         url = jrapiAPISource + 'peoplepicker?Search=' + id1;
+    } else if (endPoint === "filelist") {
+        url = jrapiAPISource + 'artifacts/' + id1;
+    } else if (endPoint === "schools") {
+        url = jrapiAPISource + 'schools';
+    } else if (endPoint === "deleterole") {
+        verb = "DELETE";
+        url = jrapiAPISource + 'roles?id=' + id1;
     } 
+
+    //atifacts/'id1?id='+ Id
 
     console.log(verb + "   " + url);
 
@@ -88,7 +97,7 @@ function showErrorModal(error) {
 // }
 
 
-function SaveJrapiPRIE(action, uri, data, onResponse, onError, close, noDialog) {
+function SaveJrapiPRIEManager(action, uri, data, onResponse, onError, close, noDialog) {
     if (!noDialog) {
        // showInProgressDialog("Please wait...", "updating changes");
     }    

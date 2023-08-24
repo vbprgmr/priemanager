@@ -17,6 +17,8 @@ function ReadySetGo(type){
 
         console.log("winner winner chicken dinner!");         
         
+        $('.menu .item').tab();
+
         BuildConcernTable("", 0, 1);
     }
 
@@ -501,3 +503,65 @@ function submitcharter(step){
         showErrorModal(error);
     }
 }
+
+
+
+function Pivot(type) {
+
+    switch (type) {
+        case "admin":
+            if (typeof $("#selPageSizeOpenIssues").attr('data-size') !== "undefined") {
+                size = $("#selPageSizeOpenIssues").attr('data-size');
+            }
+
+            ActivateIssueNumber(false);
+
+            LoadTableOpenIssues(0, size);
+            
+            
+            $("#lblPivotStatus").text('Open Issues');
+            $("#viewOpenIssues").show();
+            break;
+        case "regional":
+            if (typeof $("#selPageSizeNewIssues").attr('data-size') !== "undefined") {
+                size = $("#selPageSizeNewIssues").attr('data-size');
+            }
+
+            ActivateIssueNumber(false);
+            LoadTableNewIssues(0, size);
+            $("#lblPivotStatus").text('New Issues');
+            $("#viewNewIssues").show();
+            break;
+        case "school":
+            ActivateIssueNumber(true);
+            $("#lblPivotStatus").text('Create New Issue');
+            CreateAnIssue();
+            break;        
+    }
+}
+
+function LoadSchools(id) {
+    let theHTML = "";
+
+    $("#" + id).empty();
+
+    CallJrapiPRIE("schools", null, null, null, null).done(function (data) {
+        $.each(data, function (key, value) {
+            theHTML = `<option value="` + value.Id + `">` + value.Name + `</option>`;
+    
+            if ($("#" + id + " option[value='" + value.Id + "']").length === 0) {
+                $("#" + id).append(theHTML);
+            }
+    
+            if (key === data.length - 1) {
+                $('#' + id).select2();
+
+                if (id === "select2Schools"){
+                    BuildRoleTable("dataTableSchool", "school");
+                }
+            }
+        });
+    });    
+}
+
+

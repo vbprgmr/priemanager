@@ -5,6 +5,8 @@ let pageSizeConcern = 10;
 let totalItemsConcern = 0;
 let searchValConcern = "";
 
+let curId = "";
+
 function SimpleDate(tmpStr) {
     var isoDateString = new Date(tmpStr).toISOString().split('T')[0];
        
@@ -85,7 +87,7 @@ function BuildConcernTable(search, pIndex, pSize, id) {
 
     var url = "";
 
-    url = jrapiAPISource + "/disputes";// + "?Search=" + searchVal + "&StartIndex=" + pIndex + "&PageSize=" + pSize;
+    url = jrapiAPISource + "disputes";// + "?Search=" + searchVal + "&StartIndex=" + pIndex + "&PageSize=" + pSize;
     
     console.log(url)
 
@@ -145,30 +147,73 @@ function BuildConcernTable(search, pIndex, pSize, id) {
                 "data": null,
                 "orderable": false,
                 "render": function (data, type, row, meta) {
-                    return "Not Resolved";
+                    let theStatus = "";
+
+                    //if (data.Status =)
+
+
+                    if (!data.IsCompleted){
+                        theStatus = "Not Resolved";
+                    } else if (data.IsCompleted){
+                        theStatus = "Resolved";
+                    } 
+                    
+                    if ("Response" in data){
+                        if (data.Response === "WillNotResolve"){
+                            theStatus = "Not Resolved";
+                        }
+                    }
+                    
+                    return theStatus;
                 }
             },
             {
                 "data": null,
                 "orderable": false,
                 "render": function (data, type, row, meta) {
-                    var dateCreated = new Date(data.CreatedEST);
-                    var dateSevenDays = new Date(data.SchoolDueEST);
-                    var dateThirtyDays = new Date(data.DistrictDueEST);
+                    let theResponse = "";
                     
-                    let diffTime = Math.abs(dateSevenDays - dateCreated);
-                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                    
-                    if (diffDays > 7){
-                        diffTime = Math.abs(dateThirtyDays - dateCreated);
-                        diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                        if (diffDays > 30){
-                            diffDays = 0;
-                        }
+                    if ("Response" in data){
+                        theResponse = data.Response;
                     }
 
-                    return diffDays;
+                    if (data.IsCompleted && theResponse !== "WillNotResolve"){
+                        return "completed";
+                    }else{
+                        
+                        var dateToday = new Date();
+                        var dateCreated = new Date(data.CreatedEST);
+                        var dateSevenDays = new Date(data.SchoolDueEST);
+                        var dateThirtyDays = new Date(data.DistrictDueEST);
+                        
+                        //console.log(data);
+                        //console.log(dateSevenDays);
+                        //console.log(dateThirtyDays);
+
+                        let diffTime = Math.abs(dateToday - dateCreated);
+                        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+                        if (diffDays > 7){
+                            //diffTime = Math.abs(dateThirtyDays - dateCreated);
+                            //diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+                            
+
+                            if (diffDays > 30){
+                                diffDays = "expired";
+                            }
+                        }
+
+                        if ("Response" in data){
+                            //console.log(data.Response);
+                            if (data.Response === "WillNotResolve"){
+                                //diffTime = Math.abs(dateThirtyDays - dateCreated);
+                                //diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            }
+                        }
+
+                        return diffDays;
+                    }
                 }
             }
         ]
@@ -186,7 +231,7 @@ function BuildConcernTable(search, pIndex, pSize, id) {
             $('#ConcernCount').text('Showing ' + x + ' thru ' + y + ' items');
 
             $("#ConcernTotalItems").text("Total: " + z);
-            console.log("A");
+            //console.log("A");
         })
         .on('xhr.dt', function (e, settings, json, xhr) {
             closeInProgressDialog();
@@ -194,7 +239,7 @@ function BuildConcernTable(search, pIndex, pSize, id) {
             $('#underConcernTable').show();
 
             RefreshButtonState("Concern");
-            console.log("B");
+            //console.log("B");
         });
 
     $('#dataTableConcern tbody').on('click', 'td.details-control', function () {
@@ -209,39 +254,191 @@ function BuildConcernTable(search, pIndex, pSize, id) {
         }
         else {
             row.child(format(row.data())).show();
-                        
-            tr.addClass('shown');
+                
+            curId = $(this).next().text();
+
+            SetupEventListenersForDragDrop(curId);
+
+            console.log(curId);
+            LoadAttachments(curId);
+
+            tr.addClass('shown');            
         }
     });
 
     function format(d) {
+        var dateCreated = new Date();
+        var dateSevenDays = new Date(d.SchoolDueEST);
+        var dateThirtyDays = new Date(d.DistrictDueEST);
+        
+        let diffTime = Math.abs(dateSevenDays - dateCreated);
+        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+        if (diffDays > 7){
+            diffTime = Math.abs(dateThirtyDays - dateCreated);
+            diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > 30){
+                diffDays = 0;
+                console.log(diffDays);
+            }
+        }
+
+        console.log(diffDays);
+
         let theHTML = "";
         let theInsertHTML = "";
+
+        let chkPending = " ";
+        let chkResolved = " ";
         
 
-        
-        theHTML += `<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px; width: 100%">
-                    <tr>
-                        <td style="width: 15%; text-align: right; font-weight: bold">Resolve</td>
-                        <td style="width: 35%;text-align: left">
-                            <div name="gridStaticValue" data-id=""></div>
-                        </td>
-                        <td style="width: 15%; text-align: right; font-weight: bold"></td>
-                        <td style="width: 35%;text-align: left"></td>            
-                    </tr>` + theInsertHTML + `
-                    <tr>`;
+        if ("Response" in d){
+            if (d.Response.toLowerCase() === "willnotresolve"){
+                chkResolved = " ";
+            } else if (d.Response.toLowerCase() === "resolved"){
+                chkResolved = " checked";
+            }
+        }        
 
-                             
-                            
-        theHTML += `</td>          
-                    </tr>
-                    </table>`;
+        theHTML += `<div id="overConcernTable` + d.Id + `" class="ui grid" style="display: block;">
+                        <div class="row">
+                            <br/>
+                            <div class="sixteen wide column" style="text-align: center">                                
+                            <div class="ui` + chkPending + ` checkbox">
+                            <input id="chkPending` + d.Id + `" type="checkbox" name="Resolve"`;
+            
+                    if (chkResolved === " checked") {
+                        theHTML += ` checked=""`;
+                    } 
+                    
+                    theHTML += ` onchange="ResolutionChange('` + d.Id + `', 'p')">
+                                    <label>Pending</label>
+                                </div>&nbsp;&nbsp;&nbsp;&nbsp;
+                                <div class="ui` + chkResolved + ` checkbox">
+                                    <input id="chkResolved` + d.Id + `" type="checkbox" name="Resolve"`;
+                    
+                    if (chkResolved === " checked") {
+                        theHTML += ` checked=""`;
+                    } 
+                    
+                    theHTML += ` onchange="ResolutionChange('` + d.Id + `', 'r')">
+                                    <label>Resolved</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="sixteen wide column" style="text-align: center">
+                                <div class="ui form">
+                                    <div style="text-align: left">
+                                        <label>Notes</label>
+                                    </div>
+                                    <div class="field">
+                                        <textarea id="theNotes` + d.Id + `" rows="5" style="width: 97%"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="drop-area` + d.Id + `" class="droparea">
+                            <form class="my-form">
+                                <p>Upload multiple files with the file dialog or by dragging and dropping images onto the dashed region</p>
+                                <div class="row">
+                                    <div class="eight wide column" style="text-align: ">                                        
+                                        <input type="file" id="fileElem` + d.Id + `" class="fileElem" multiple accept="image/*" onchange="handleFiles(this.files, '` + d.Id + `')">
+                                        <label class="button" for="fileElem` + d.Id + `">Select files</label>
+                                    </div>
+                                </div>
+                            </form>
+                            <progress id="progress-bar` + d.Id + `" max=100 value=0 style="width: 100%"></progress>
+                            <div id="gallery` + d.Id + `" class="gallery" /></div>
+                        </div>
+                        <div class="row">
+                            <div class="sixteen wide column" style="text-align: right">                                
+                                <button class="ui primary button" onclick="SaveResolution('` + d.Id + `')">
+                                    Save
+                                </button>&nbsp;
+                                <button class="ui button" onclick="$(this).closest('tr').prev('tr').find('.details-control').click();">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>                                         
+                    </div>`;
 
-        return theHTML;
+        return theHTML;        
     }
 }
+
+function LoadAttachments(id){
+    let theHTML = "";
+    
+    CallJrapiPRIE("filelist", id, null, null, null).done(function (data) {        
+        $.each(data, function(key, value){
+            theHTML = `<a href="` + jrapiAPISource + `artifacts/` + id + `?id=` + value.Id + `" target="_blank"><i class="fas fa-download"></i>&nbsp;` + value.Name + `</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`;
+
+            //if (key + 1 === data.length){
+                $('#gallery' + id).append(theHTML);
+            //}    
+        })        
+     }); 
+}
+
+function getFile(attachmentId, concernId){
+
+}
+
+function SetupEventListenersForDragDrop(id){
+    // ************************ Drag and drop ***************** //
+    dropArea = document.getElementById("drop-area" + id)
+    uploadProgress = []
+    progressBar = document.getElementById('progress-bar' + id)
+
+    // Prevent default drag behaviors
+    ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, false)   
+    document.body.addEventListener(eventName, preventDefaults, false)
+    })
+
+    // Highlight drop area when item is dragged over it
+    ;['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false)
+    })
+
+    ;['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false)
+    })
+
+    // Handle dropped files
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    
+}
+
+function ResolutionChange(id, type){
+    if (type === "p"){
+        if ($('#chkPending' + id).is(':checked')){
+            $('#chkResolved' + id).prop('checked', false);
+        }else if ($('#chkUnresolved' + id).is(':checked')){
+            $('#chkResolved' + id).prop('checked', false);
+        }else if ($('#chkResolved' + id).is(':checked')){
+            $('#AttachmentDiv' + id).hide();
+        }
+    }
+    if (type === "r"){
+        if ($('#chkResolved' + id).is(':checked')){
+            console.log($('#chkResolved' + id).is(':checked'));
+            $('#AttachmentDiv' + id).hide();
+        }else if ($('#chkUnresolved' + id).is(':checked')){
+            console.log($('#chkUnresolved' + id).is(':checked'));
+            $('#chkResolved' + id).prop('checked', false);
+            $('#AttachmentDiv' + id).show();
+        }
+    }
+}
+
+
 function ReloadConcernTable(reset) {
     var order;
+    
 
     if ($('#iSearchValue').hasClass("fa-sort-numeric-down") | $('#iSearchValue').hasClass("fa-sort-alpha-down")) {
         order = "-asc";
@@ -279,8 +476,7 @@ function ReloadConcernTable(reset) {
 
     showInProgressDialog("Please wait...", "Loading Concern Requests");
 
-    //var url = jrapiAPISource + "cases?Search=" + searchVal + "&Fields=" + fields + "&Sort=" + fields + "&Order=" + order + "&StartIndex=" + pageIndexConcern + "&PageSize=" + pageSizeConcern + "&schoolyear=" + $("#selYear").val();
-    var url = jrapiAPISource + "/Concernforms" + "?Where=" + encodeURI(searchVal) + "&Sort=" + encodeURI(fields) + " " + order + "&StartIndex=" + pageIndexConcern + "&PageSize=" + pageSizeConcern;
+    var url = jrapiAPISource + "disputes" + "?Where=" + encodeURI(searchVal) + "&Sort=" + encodeURI(fields) + " " + order + "&StartIndex=" + pageIndexConcern + "&PageSize=" + pageSizeConcern;
 
     //$('#overConcernTable').hide();
     $('#ConcernNavigation').hide();
@@ -397,6 +593,121 @@ function DenyConcernDevice(type, formId, studentId) {
         closeInProgressDialog();
         showErrorModal(error);
     }    
+}
+
+function SaveResolution(id){
+    showInProgressDialog("Please wait...", "Saving changes");
+    let postObject = {};
+    let theResponse = 'WillNotResolve';
+
+    if ($('#chkResolved' + id).is(':checked')){
+        theResponse = 'Resolved';
+    }
+    
+    postObject.Id = id;
+    postObject.Response = theResponse;
+    postObject.CompletionNotes = $('#theNotes' + id).val();
+
+    SaveJrapiPRIEManager("POST", jrapiAPISource + "submitResponse", postObject, onSuccess, onFail, true, true);
+
+    function onSuccess(data) {
+        ReloadConcernTable(false);
+
+
+    //     if (!data.Success) {
+    //         showErrorModal(data);
+    //         return;
+    //     } 
+        
+
+    //     showSuccessDialog("Success", "Your information has been saved!");
+    }
+
+    function onFail(error) {
+        closeInProgressDialog();
+        showErrorModal(error);
+    }
+}
+
+function BuildRoleTable(tableId, type1) {
+    showInProgressDialog("Please wait...", "Loading Data");
+    
+    var url = "";
+    
+    if (type1 === "admin"){
+        url = jrapiAPISource + "roles?schoolid=admin";
+    }else if (type1 === "school"){
+        url = jrapiAPISource + "roles?schoolid=" + $('#select2Schools').val();
+    }    
+
+    console.log(url);
+    console.log(tableId);
+
+    if ($.fn.dataTable.isDataTable('#' + tableId)) {
+        $('#' + tableId).DataTable().clear().draw();
+
+        $('#' + tableId).DataTable().ajax.url(url).load();
+
+        return;
+    }
+
+    var table = $('#' + tableId).DataTable({
+        "dom": 'frtip',
+        ajax: {
+            "url": url,
+            "type": "GET",
+            "headers":
+            {
+                "Accept": "application/json;odata=verbose",
+                "token": JRTKN
+            },
+            "dataSrc": ""
+        },
+        "columns": [
+            {
+                "data": null,
+                "orderable": false,
+                "render": function (data, type, row, meta) {
+
+                    var theHTML = `<a href="javascript:void(0)" onclick="DeleteRole('` + data.Id + `', '` + type1 + `')"><img src="../image/trash.png" style="height: 20px; width: 20px"/></a>`;
+
+                    return theHTML;
+                }
+            },
+            {
+                "data": "DisplayName",
+                "orderable": false,
+            },
+            {
+                "data": "Role",
+                "orderable": false,
+            },
+            {
+                "data": null,
+                "orderable": false,
+                "render": function (data, type, row, meta) {
+
+                    return "";
+                }
+            }
+        ]
+    })
+    .on('xhr', function (e, settings, json) {
+        if (json.aaData == null){
+            //SettingsAddRole('admin');
+        }
+    })
+    .on('xhr.dt', function (e, settings, json, xhr) {
+        closeInProgressDialog();
+    });    
+}
+
+function ReloadBookTable() {
+    table.clear();
+
+    table.rows.add(StudentData).draw();
+
+    GetStudentImage($('#select2Students').val());
 }
 
 

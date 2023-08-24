@@ -19,8 +19,26 @@
       
       <div class="row">
         <div id="bigConcern" class="sixteen wide column">
-          
-
+            <div id="Heading" class="ui grid" style="display: block;">
+              <div class="row">              
+                <div class="sixteen wide column">
+                  <div>
+                      <img style="padding-top: 10px; height: 86px; width: 128px; position: relative" src="image/DCPS_LOGO_128x86.png" />
+                      <span style="position: absolute; bottom: 0; padding-left: 20px">
+                      <h1>
+                        Parental Rights in Education - Manager
+                      </h1>                      
+                      </span>
+                      <div style="text-align: right"><a href="#" onclick="ShowSettingsModal('admin')"><i class="fas fa-cog"></i></a>&nbsp;&nbsp;&nbsp;</div>
+                  </div>                
+                </div>              
+              </div>
+              <div class="row">              
+                <div class="sixteen wide column">
+                  
+                </div>              
+              </div>
+            </div>
             <fieldset id="fsConcern" class="border p-2" style="height: auto; position: relative;">
                 <div id="overConcernTable" class="ui grid" style="display: block;">
                     <div class="row">
@@ -47,13 +65,13 @@
                     <thead>
                         <tr id="heads">
                             <th style="width: 20px"></th>
-                            <th style="text-align: left"><a id="chkId" data-type="date" data-field="$[Form]_.SubmittedTime" href="#" onclick="dataTableConcernSort(this)">Concern #</a></th>
-                            <th style="text-align: left"><a id="chkDateSubmitted" data-type="date" data-field="$[Form]_.SubmittedTime" href="#" onclick="dataTableConcernSort(this)">Date Submitted</a></th>
-                            <th style="text-align: left"><a id="chkSchoolName" data-type="text" data-field="$[Form]_.Student.SchoolName" href="#" onclick="dataTableConcernSort(this)">School</a></th>
-                            <th style="text-align: left"><a id="chkStudentName" data-type="text" data-field="$[Form]_.Student.GradeLevel" href="#" onclick="dataTableConcernSort(this)">Student Name</a></th>
-                            <th style="text-align: left"><a id="chkStudentId" data-type="text" data-field="$[Form]_.Student.Id" href="#" onclick="dataTableConcernSort(this)">Student Id</a></th>
-                            <th style="text-align: left"><a id="chkStatus" data-type="text" data-field="$[Status]_.State" href="#" onclick="dataTableConcernSort(this)"><span style="color: red" data-value="!is_null($[Status]_.State, 'Pending')" data-field="$[Status]_.State">Status</span></a></th>
-                            <th style="text-align: left"><a id="chkDaysRemaining" data-type="text" data-field="$[Status]_.State" href="#" onclick="dataTableConcernSort(this)">Days Remaining</span></a></th>
+                            <th style="text-align: left">Concern #</th>
+                            <th style="text-align: left">Date Submitted</th>
+                            <th style="text-align: left">School</th>
+                            <th style="text-align: left">Student Name</th>
+                            <th style="text-align: left">Student Id</th>
+                            <th style="text-align: left">Status</th>
+                            <th style="text-align: left">Days Remaining</th>
                           </tr>
                     </thead>
                 </table><br />
@@ -75,10 +93,124 @@
       </div>
     </div>
   </div>
+  <div id="ModalSettings" class="ui modal" >
+    <i class="close icon"></i>
+    <div class="header">
+      User Access
+    </div>
+    <div id="ModalSettingsContent" class="content ui container" style="padding-top: 10px"> 
+      <div id="menuSettings" class="ui top attached tabular menu">
+        <a id="SettingsTabAdmin" class="active item" data-tab="admin" onclick="ShowSettings('admin')">Admin</a>
+        <a id="SettingsTabSchool" class="item" data-tab="school" onclick="ShowSettings('school')">School</a>
+      </div>
+      <div id="AdminSegment" class="ui bottom attached tab segment" data-tab="admin">        
+        
+        <div id="dataTableAdminWrapper">
+        <table id="dataTableAdmin" class="display" style="width:100%;">
+          <thead>
+            <tr id="heads">
+              <th style="width: 20px"></th>
+              <th style="text-align: left">Account</th>
+              <th style="text-align: left">Role</th>
+              <th style="text-align: right;"><a href="javascript:void(0)" onclick="SettingsAddRole('admin')"><i class="fas fa-user-plus"></i></a></th>             
+            </tr>
+          </thead>
+        </table>
+        </div>
+
+        <div id="AdminEntry" style="display: none">
+          <form class="ui form">
+            <div class="fields">
+            <div class="sixteen wide field">
+              <div id="RoleRadiosAdmin" style="text-align: center" onclick="ReLoadTableRoleSettings()">
+                <input type="radio" name="flexRadioRole" id="flexRadioAdmin" checked="" value="admin" />&nbsp;<label class="" for="flexRadioAdmin">Admin</label>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="flexRadioRole" id="flexRadioChief" value="chief" />&nbsp;<label class="" for="flexRadioChief">Chief</label>
+              </div>
+              <label style="text-align: left">Account</label>
+              <label style="text-align: right"><a href="javascript:void(0)" alt="save" title="save" onclick="SaveARole('admin')">
+                <i class="fas fa-save"></i>
+              </a>&nbsp;&nbsp;
+              <a id="SettingsBackAdmin" onclick="BackSettingsModal('admin', false)" alt="back" title="back" href="javascript:void(0)">
+                <i class="fas fa-backspace"></i>
+              </a>&nbsp;</label>
+              <div id="searchPeoplePickerAdmin" class="ui fluid search .menu {overflow: visible !important;}" style="padding: 3px 25px 3px 4px; border: solid 1px; border-radius: 5px; font-size: 14px">                                    
+                <div class="ui icon input">
+                    <input id="PeoplePickerAdmin" style="border : none;" class="prompt" type="text" placeholder="Search user or group..."/>
+                    <i id="icoPeoplePickerLoading" style="display: none; float: right" class="search icon"></i>   
+                </div>
+            </div>
+            </div>
+          </div>
+            </form>
+        </div>
+
+
+      </div>
+      <div id="schoolSegment" class="ui bottom attached tab segment" data-tab="school">
+        <div>
+          School:&nbsp;
+        <select id="select2Schools" name="school" onchange="BuildRoleTable('dataTableSchool', 'school')">
+        </select>
+        <br/><hr style="width: 100%">
+
+        <div id="dataTableSchoolWrapper">
+        <table id="dataTableSchool" class="display" style="width:100%;">
+          <thead>
+            <tr id="heads">
+              <th style="width: 20px"></th>
+              <th style="text-align: left">Account</th>
+              <th style="text-align: left">Role</th>
+              <th style="text-align: right;"><a href="javascript:void(0)" onclick="SettingsAddRole('school')"><i class="fas fa-user-plus"></i></a></th>             
+            </tr>
+          </thead>
+        </table>
+      </div>
+        
+      <div id="SchoolEntry" style="display: none">
+        <form class="ui form">
+          <div class="fields">
+          <div class="sixteen wide field">
+            <div id="RoleRadiosSchool" style="text-align: center" onclick="ReLoadTableRoleSettings()">
+              <input type="radio" name="flexRadioRole" id="flexRadioPrincipal" checked="" value="designee" />&nbsp;<label class="" for="flexRadioPrincipal">principal</label>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <input type="radio" name="flexRadioRole" id="flexRadioDelegate" checked="" value="designee" />&nbsp;<label class="" for="flexRadioDelegate">delegate</label>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <input type="radio" name="flexRadioRole" id="flexRadioManager" checked="" value="designee" />&nbsp;<label class="" for="flexRadioManager">manager</label>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <input type="radio" name="flexRadioRole" id="flexRadioRegional" checked="" value="designee" />&nbsp;<label class="" for="flexRadioRegional">regional</label>
+            </div>
+            <label style="text-align: left">Account</label>
+            <label style="text-align: right"><a href="javascript:void(0)" alt="save" title="save" onclick="SaveARole('school')">
+              <i class="fas fa-save"></i>
+            </a>&nbsp;&nbsp;
+            <a id="SettingsBackSchool" onclick="BackSettingsModal('school', false)" alt="back" title="back" href="javascript:void(0)">
+              <i class="fas fa-backspace"></i>
+            </a>&nbsp;</label>
+            <div id="searchPeoplePickerSchool" class="ui fluid search .menu {overflow: visible !important;}" style="padding: 3px 25px 3px 4px; border: solid 1px; border-radius: 5px; font-size: 14px">                                    
+              <div class="ui icon input">
+                  <input id="PeoplePickerSchool" style="border : none;" class="prompt" type="text" placeholder="Search user or group..."/>
+                  <i id="icoPeoplePickerLoading" style="display: none; float: right" class="search icon"></i>   
+              </div>
+          </div>
+          </div>
+        </div>
+          </form>
+      </div>
+
+      </div>       
+    </div>
+    <br/>
+    <div class="actions" style="text-align: right; display: none">
+      <div class="ui black deny button">
+        Close
+      </div>
+    </div>
+  </div>
 </body>
-<dialog id="dialog" style="position: absolute; top: 50%">
-  <div id="LoaderTitle">Loading Data</div>
-    <div class="ui segment" style="width: 300px; height: 80px">
+<dialog id="dialog" style="position: absolute; top: 50%; background-color: grey;">
+  <div id="LoaderTitle" style="color: white">Loading Data</div>
+    <div class="ui segment" style="width: 300px; height: 80px; background-color: grey;">
     <div class="ui active inverted dimmer">
       <div id="LoaderMessage" class="ui indeterminate text loader">Loading...</div>
     </div>
@@ -91,7 +223,11 @@
 <script src="script/semantic.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="script/app.js"></script>
+<script src="script/data.js"></script>
 <script src="script/datatable.js"></script>
+<script src="script/settings.js"></script>
+<script src="script/dd-upload.js"></script>
+<script src="script/dragdrop.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>window.onload=ReadySetGo();</script>
