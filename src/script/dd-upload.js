@@ -69,18 +69,22 @@ var ddupResponse = {
             xhr.onload = function () {
                 ddupResponse.hstat.innerHTML += `<div>${thisfile.name} - ${this.response}</div>`;
                 ddupResponse.uplock = false;
+                console.log('onload');
                 ddupResponse.go();
             };
             xhr.onerror = function (evt) {
                 ddupResponse.hstat.innerHTML += `<div>${thisfile.name} - AJAX ERROR</div>`;
                 ddupResponse.uplock = false;
+                console.log('onerror');
                 ddupResponse.go();
             };
             xhr.onloadend = function (evt) {
                 ddupResponse.hstat.innerHTML = ``;
                 ddupResponse.uplock = false;
-                ddupResponse.go();
-                ShowResponseAttachments($('#upzoneContainer').attr('data-id'), 'response');
+                console.log('onloadend');
+                ddupResponse.go();                
+                console.log(thisfile.name);
+                LoadAttachments($('#lblIssueNumber').attr('data-id')); 
             };
             xhr.send(data);            
         }
@@ -169,8 +173,10 @@ var ddup = {
             xhr.onloadend = function (evt) {
                 ddup.hstat.innerHTML = ``;
                 ddup.uplock = false;
+                console.log('2');
                 ddup.go();
-                ShowAttachments($('#lblIssueNumber').attr('data-id'), 'new');
+                console.log(thisfile.name);
+                LoadAttachments($('#lblIssueNumber').attr('data-id'));                
             };
             xhr.send(data);
         }

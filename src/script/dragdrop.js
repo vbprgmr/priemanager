@@ -63,8 +63,6 @@ function updateProgress(fileNumber, percent) {
 }
 
 function handleFiles(files, id) {
-console.log(id);
-
     files = [...files];
 
     initializeProgress(files.length);
@@ -77,8 +75,6 @@ console.log(id);
 }
 
 function previewFile(file, id) {
-    console.log(id);
-
     let reader = new FileReader()
 
     reader.readAsDataURL(file);
@@ -119,8 +115,10 @@ function uploadFile(file, i) {
         else if (xhr.readyState == 4 && xhr.status != 200) {
             // Error. Inform the user
         }
+    })
 
-        GetFileList(z);
+    xhr.addEventListener('loadend', function(e) { 
+      LoadAttachments(z);
     })
 
   formData.append('upload_preset', 'ujpu6gyk');
@@ -129,14 +127,3 @@ function uploadFile(file, i) {
   xhr.send(formData);
 }
 
-function GetFileList(id){
-  CallJrapiPRIE("filelist", id, null, null, null).done(function (data) {
-    $.each(data, function (key, value) {
-        
-
-        if (key === data.length - 1) {
-            
-        }
-    });
-});    
-}

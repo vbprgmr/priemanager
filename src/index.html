@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="background-color: lightgrey">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,23 +15,31 @@
 
 <body>
   <div class="ui container" style="background-color: white; padding-left: 10px; padding-right: 10px; padding-bottom: 10px; padding-top: 0px">
-    <div id="TheLandingGrid" class="ui grid" style="display: flex">      
-      
+    <div id="TheLandingGrid" class="ui grid" style="display: flex">
       <div class="row">
         <div id="bigConcern" class="sixteen wide column">
             <div id="Heading" class="ui grid" style="display: block;">
+              <br>
               <div class="row">              
-                <div class="sixteen wide column">
+                <div class="three wide column">
                   <div>
-                      <img style="padding-top: 10px; height: 86px; width: 128px; position: relative" src="image/DCPS_LOGO_128x86.png" />
-                      <span style="position: absolute; bottom: 0; padding-left: 20px">
-                      <h1>
-                        Parental Rights in Education - Manager
-                      </h1>                      
-                      </span>
-                      <div style="text-align: right"><a href="#" onclick="ShowSettingsModal('admin')"><i class="fas fa-cog"></i></a>&nbsp;&nbsp;&nbsp;</div>
+                      <img style="padding-top: 0px; height: 86px; width: 128px; position: relative" src="image/DCPS_LOGO_128x86.png" />
                   </div>                
-                </div>              
+                </div> 
+                <div class="twelve wide column">
+                  <div>
+                      <span style="position: absolute; padding-top: 50px; padding-left: 20px">
+                      <h1>
+                        Parental Rights in Education - Concern List
+                      </h1>                     
+                      </span>                      
+                  </div>                
+                </div>    
+                <div class="one wide column" style="text-align: right">
+                  <div style="padding-top: 70px">
+                      <a href="#" style="text-align: right; position:relative" onclick="ShowSettingsModal('admin')"><i class="fas fa-cog"></i></a>&nbsp;&nbsp;&nbsp;                      
+                  </div>                
+                </div>            
               </div>
               <div class="row">              
                 <div class="sixteen wide column">
@@ -41,7 +49,7 @@
             </div>
             <fieldset id="fsConcern" class="border p-2" style="height: auto; position: relative;">
                 <div id="overConcernTable" class="ui grid" style="display: block;">
-                    <div class="row">
+                    <div class="row" style="height: auto">
                         <div class="four wide column">
                             &nbsp;&nbsp;Show <select id="selConcernPageSize" onchange="ReloadConcernTable(true)">
                                     <option>10</option>
@@ -50,12 +58,12 @@
                                     <option>100</option>
                                 </select> entries 
                         </div>
-                        <div class="eight wide column" style="display: flex">
-                            <a href="#" onclick="AdjustConcernSort()"><i style="display: block; width: 20%" id="iSearchValue" class="fas fa-lg"></i></a>&nbsp;&nbsp;
-                            <input id="searchValConcern" type="text" placeholder="Search Status" style="display: block; width: 60%; border-radius: 3px" onkeyup="KeyupSearchConcern(window.event.keyCode, this.value);"/>&nbsp;
+                        <div class="nine wide column" style="display: flex">
+                            <a href="#" onclick="AdjustConcernSort()"><i style="display: block; line-height: normal;color: red" id="iSearchValue" class="fas fa-lg"></i></a>&nbsp;&nbsp;
+                            <input id="searchValConcern" type="text" placeholder="Search Status" style="display: block; width: 60%; border-radius: 3px" onkeyup="KeyupSearch(window.event.keyCode, this.value);"/>&nbsp;
                             <button id="SearchConcern" class="btn btn-outline-primary" style="display: block;" type="button" onclick="ReloadConcernTable(true)">Search Status</button>
                         </div>
-                        <div class="four wide column" style="text-align: right">
+                        <div class="three wide column" style="text-align: right">
                             <div id="ConcernTotalItems"></div>
                         </div>
                     </div>                
@@ -65,13 +73,13 @@
                     <thead>
                         <tr id="heads">
                             <th style="width: 20px"></th>
-                            <th style="text-align: left">Concern #</th>
-                            <th style="text-align: left">Date Submitted</th>
-                            <th style="text-align: left">School</th>
-                            <th style="text-align: left">Student Name</th>
-                            <th style="text-align: left">Student Id</th>
-                            <th style="text-align: left">Status</th>
-                            <th style="text-align: left">Days Remaining</th>
+                            <th style="text-align: left"><a id="chkId" data-type="text" href="#" onclick="dataTableConcernSort(this)">Concern #</a></th>
+                            <th style="text-align: left"><a id="chkDateSubmitted" data-type="date" href="#" onclick="dataTableConcernSort(this)">Date Submitted</a></th>
+                            <th style="text-align: left"><a id="chkSchool" data-type="text" href="#" onclick="dataTableConcernSort(this)">School</a></th>
+                            <th style="text-align: left"><a id="chkStudentName" data-type="text" href="#" onclick="dataTableConcernSort(this)">Student Name</a></th>
+                            <th style="text-align: left"><a id="chkStudentId" data-type="text" href="#" onclick="dataTableConcernSort(this)">Student Id</a></th>
+                            <th style="text-align: left"><a id="chkStatus" data-type="none" href="#" onclick="dataTableConcernSort(this)">Status</a></th>
+                            <th style="text-align: left"><a id="chkDays" data-type="none" href="#" onclick="dataTableConcernSort(this)">Days Remaining</a></th>
                           </tr>
                     </thead>
                 </table><br />

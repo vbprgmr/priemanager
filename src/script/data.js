@@ -11,10 +11,15 @@ function CallJrapiPRIE(endPoint, id1, id2, id3, id4, id5) {
     } else if (endPoint === "deleterole") {
         verb = "DELETE";
         url = jrapiAPISource + 'roles?id=' + id1;
+    } else if (endPoint === "deleteattachment") {
+        verb = "DELETE";
+        url = jrapiAPISource + 'artifacts/' + id1 + '?id=' + id2;
+    } else if (endPoint === "CompletionNotes") {
+        url = jrapiAPISource + 'completionnotes?id=' + id1;
+    } else if (endPoint === "concerninfo") {
+        url = jrapiAPISource + 'disputes?id=' + id1;
     } 
-
-    //atifacts/'id1?id='+ Id
-
+    
     console.log(verb + "   " + url);
 
     return $.ajax({
