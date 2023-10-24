@@ -17,6 +17,12 @@ function ReadySetGo(type){
 
         console.log("winner winner chicken dinner!");         
         
+        if (getParameterByName('action', false) === "NewDisputeNotification"){
+            let id = getParameterByName('disputeId', false);
+
+            $('#searchValConcern').val(id);
+        }
+
         $('.menu .item').tab();
 
         BuildConcernTable(0, 10, null);
@@ -147,12 +153,6 @@ function ExamplePromise(){
 
 function GetDisputes(){
     let x = 0;
-    let gotoLocation = "http://www.google.com";
-
-    console.log("getting desputes");
-
-    
-
 
     CallJrapiPRIE("disputes", null, null, null, null).done(function (data) {
         if (data.Items.length > 1){
@@ -388,42 +388,24 @@ function BuildRequirements(){
 
 function submitstep(step){   
     var postObject = {};
-
-    if (step === "1"){
-        let opt = "";
-
-        $('input[name="requirement"]').each(function(key, value){            
-            if ($(value).is(':checked')){
-                opt = $(value).attr('id').substr(3);
-            }                        
-        })
-        
-        postObject.SchoolId = $('#select2SchoolsStep1').val();
-        postObject.StudentId = $('#select2StudentsStep1').val();
-        postObject.IncidentDate = $('#Step1IncidentDate').val();
-        postObject.RequirementsOption = opt;
-        postObject.DisputeDescription = $('#DisputeDescription').val();
-        postObject.ProposedSolution = $('#ProposedSolution').val();
-    } else if (step === "2") {
-        let ValidMessage = ValidateSubmit(step);
-        
-        if (ValidMessage !== ""){
-            $('#ModalValidationContent').empty();
-
-            theHTML = `<div style='padding: 20px'>The following information is missing:</div><div class="row">` + ValidMessage + `</div>`;
-
-            $('#ModalValidationContent').append(theHTML);
-
-            $('#ModalValidation').modal('show');
-        } else {
-            alert('submit');
-        };
-    }
     
+    let opt = "";
+
+    $('input[name="requirement"]').each(function(key, value){            
+        if ($(value).is(':checked')){
+            opt = $(value).attr('id').substr(3);
+        }                        
+    })
+    
+    postObject.SchoolId = $('#select2SchoolsStep1').val();
+    postObject.StudentId = $('#select2StudentsStep1').val();
+    postObject.IncidentDate = $('#Step1IncidentDate').val();
+    postObject.RequirementsOption = opt;
+    postObject.DisputeDescription = $('#DisputeDescription').val();
+    postObject.ProposedSolution = $('#ProposedSolution').val();
 
     console.log(postObject);
     
-
     SaveJrapiPRIE("POST", jrapiAPISource + "submitstep" + step + "/", postObject, onSuccess, onFail, true, true);
 
     function onSuccess(data) {
@@ -515,10 +497,7 @@ function submitcharter(step){
     }
 }
 
-
-
 function Pivot(type) {
-
     switch (type) {
         case "admin":
             if (typeof $("#selPageSizeOpenIssues").attr('data-size') !== "undefined") {
@@ -575,43 +554,108 @@ function LoadSchools(id) {
     });    
 }
 
+function SaveResponse(id, Complete){
+    showInProgressDialog("Please wait...", "Saving changes");
+    var postObject = {};
+        
+    postObject.Id = id;
+
+    if ($('#chkResolved' + id).is(':checked')){
+        postObject.CompletionResponse = "Resolved";
+    } else{
+        postObject.CompletionResponse = "";
+    }
+    
+    postObject.Complete = Complete;
+
+    postObject.CompletionNotes = $('#theNotes' + id).val();
+
+    SaveJrapiPRIEManager("POST", jrapiAPISource + "submitresponse/", postObject, onSuccess, onFail, true, true);
+
+    function onSuccess(data) {
+        //LoadAttachments(curId);
+
+        //GetCompletionNotes(curId);
+
+        //GetConcernInfo(curId);
+        
+        ReloadConcernTable(true, null, id);
+        
+        closeInProgressDialog();
+        if (!data.Success) {
+            showErrorModal(data);
+            return;
+        } 
+        
+        //showSuccessDialog("Success", "Your changes have been saved!");
+    }
+
+    function onFail(error) {
+        closeInProgressDialog();
+        showErrorModal(error);
+    }
+}
+
 function Confirm(title, msg, $true, $false, $link, $Id1, $Id) { /*change*/
-        var $content =  "<div class='dialog-ovelay'>" +
-                        "<div class='dialog'><header>" +
-                         " <h3> " + title + " </h3> " +
-                         "<i class='fa fa-close'></i>" +
-                     "</header>" +
-                     "<div class='dialog-msg' style='white-space: nowrap'>" +
-                         " <p> " + msg + " </p> " +
-                     "</div>" +
-                     "<footer>" +
-                         "<div class='controls'>" +
-                             " <button class='button button-danger doAction'>" + $true + "</button> " +
-                             " <button class='button button-default cancelAction'>" + $false + "</button> " +
-                         "</div>" +
-                     "</footer>" +
-                  "</div>" +
-                "</div>";
-         $('body').prepend($content);
-      $('.doAction').click(function () {
+    let AddResponse = "";
+
+    if ($link === "saveresponse"){
+        AddResponse = ` <button class='button button-default doActionComplete'>Confirm and Complete</button> `;
+    }
+
+    var $content =  "<div id='ConfirmOverlay' class='dialog-ovelay center'>" +
+                    "<div id='DialogCenter' class='dialog center'><header>" +
+                        " <h3> " + title + " </h3> " +
+                        "<i class='fa fa-close'></i>" +
+                    "</header>" +
+                    "<div class='dialog-msg' style='white-space: nowrap'>" +
+                     " <p> " + msg + " </p> " + 
+                    "</div>" +
+                    "<footer>" +
+                        "<div class='controls'>" + AddResponse + 
+                            " <button class='button button-default doAction'>" + $true + "</button> " +
+                            " <button class='button button-default cancelAction'>" + $false + "</button> " +                            
+                        "</div>" +
+                    "</footer>" +
+                "</div>" +
+            "</div>";
+
+    $('body').prepend($content);    
+
+    $(window).scrollTop(0);    
+
+    $('.doAction').click(function () {
         if($link === "deleteattachment"){
             CallJrapiPRIE("deleteattachment", $Id1, $Id, null, null).done(function (data) {
                 LoadAttachments($Id1); 
             });    
         } else if($link === "deleteaccount"){
             DeleteRole($Id, $Id1)
+        } else if($link === "saveresponse"){
+            SaveResponse($Id, false)
         }
         $(this).parents('.dialog-ovelay').fadeOut(500, function () {
           $(this).remove();
         });
       });
-$('.cancelAction, .fa-close').click(function () {
+
+      $('.doActionComplete').click(function () {
+        if($link === "saveresponse"){
+            SaveResponse($Id, true)
+        }
+        $(this).parents('.dialog-ovelay').fadeOut(500, function () {
+          $(this).remove();
+        });
+      });
+
+    $('.cancelAction, .fa-close').click(function () {
         $(this).parents('.dialog-ovelay').fadeOut(500, function () {
           $(this).remove();
         });
       });
       
    };
+   
 
 
 

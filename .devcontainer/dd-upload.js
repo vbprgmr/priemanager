@@ -1,4 +1,4 @@
-/artifacts POST
+//artifacts POST
 
 var ddupResponse = {
     hzone: null, // HTML upload zone

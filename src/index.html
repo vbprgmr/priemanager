@@ -14,7 +14,7 @@
 </head>
 
 <body>
-  <div class="ui container" style="background-color: white; padding-left: 10px; padding-right: 10px; padding-bottom: 10px; padding-top: 0px">
+  <div id="TheContainer" class="ui container" style="background-color: white; padding-left: 10px; padding-right: 10px; padding-bottom: 10px; padding-top: 0px">
     <div id="TheLandingGrid" class="ui grid" style="display: flex">
       <div class="row">
         <div id="bigConcern" class="sixteen wide column">
@@ -60,8 +60,8 @@
                         </div>
                         <div class="nine wide column" style="display: flex">
                             <a href="#" onclick="AdjustConcernSort()"><i style="display: block; line-height: normal;color: red" id="iSearchValue" class="fas fa-lg"></i></a>&nbsp;&nbsp;
-                            <input id="searchValConcern" type="text" placeholder="Search Status" style="display: block; width: 60%; border-radius: 3px" onkeyup="KeyupSearch(window.event.keyCode, this.value);"/>&nbsp;
-                            <button id="SearchConcern" class="btn btn-outline-primary" style="display: block;" type="button" onclick="ReloadConcernTable(true)">Search Status</button>
+                            <input id="searchValConcern" type="text" placeholder="" style="display: block; width: 60%; border-radius: 3px" onkeyup="KeyupSearch(window.event.keyCode, this.value);"/>&nbsp;
+                            <button id="SearchConcern" class="btn btn-outline-primary" style="display: block;" type="button" onclick="ReloadConcernTable(true)">Search</button>
                         </div>
                         <div class="three wide column" style="text-align: right">
                             <div id="ConcernTotalItems"></div>
@@ -73,13 +73,13 @@
                     <thead>
                         <tr id="heads">
                             <th style="width: 20px"></th>
-                            <th style="text-align: left"><a id="chkId" data-type="text" href="#" onclick="dataTableConcernSort(this)">Concern #</a></th>
-                            <th style="text-align: left"><a id="chkDateSubmitted" data-type="date" href="#" onclick="dataTableConcernSort(this)">Date Submitted</a></th>
-                            <th style="text-align: left"><a id="chkSchool" data-type="text" href="#" onclick="dataTableConcernSort(this)">School</a></th>
-                            <th style="text-align: left"><a id="chkStudentName" data-type="text" href="#" onclick="dataTableConcernSort(this)">Student Name</a></th>
-                            <th style="text-align: left"><a id="chkStudentId" data-type="text" href="#" onclick="dataTableConcernSort(this)">Student Id</a></th>
-                            <th style="text-align: left"><a id="chkStatus" data-type="none" href="#" onclick="dataTableConcernSort(this)">Status</a></th>
-                            <th style="text-align: left"><a id="chkDays" data-type="none" href="#" onclick="dataTableConcernSort(this)">Days Remaining</a></th>
+                            <th style="text-align: left"><a id="chkId" data-type="text" href="#" onclick="dataTableConcernSort(this, true)">Concern #</a></th>
+                            <th style="text-align: left"><a id="chkDateSubmitted" data-type="date" href="#" onclick="dataTableConcernSort(this, true)">Date Submitted</a></th>
+                            <th style="text-align: left"><a id="chkSchool" data-type="text" href="#" onclick="dataTableConcernSort(this, true)">School</a></th>
+                            <th style="text-align: left"><a id="chkStudentName" data-type="text" href="#" onclick="dataTableConcernSort(this, true)">Student Name</a></th>
+                            <th style="text-align: left"><a id="chkStudentId" data-type="text" href="#" onclick="dataTableConcernSort(this, true)">Student Id</a></th>
+                            <th style="text-align: left"><a id="chkStatus" data-type="none" href="#" onclick="dataTableConcernSort(this, true)">Status</a></th>
+                            <th style="text-align: left"><a id="chkDays" data-type="none" href="#" onclick="dataTableConcernSort(this, true)">Days Remaining</a></th>
                           </tr>
                     </thead>
                 </table><br />
@@ -133,7 +133,9 @@
               <div id="RoleRadiosAdmin" style="text-align: center" onclick="ReLoadTableRoleSettings()">
                 <input type="radio" name="flexRadioRole" id="flexRadioAdmin" checked="" value="admin" />&nbsp;<label class="" for="flexRadioAdmin">Admin</label>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <input type="radio" name="flexRadioRole" id="flexRadioChief" value="chief" />&nbsp;<label class="" for="flexRadioChief">Chief</label>
+                <input type="radio" name="flexRadioRole" id="flexRadioChief" value="chief" />&nbsp;<label class="" for="flexRadioChief">Chief of Schools (DCPS)</label>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="flexRadioRole" id="flexRadioCharterOffice" value="CharterOffice" />&nbsp;<label class="" for="flexRadioCharterOffice">Charter School Office</label>
               </div>
               <label style="text-align: left">Account</label>
               <label style="text-align: right"><a href="javascript:void(0)" alt="save" title="save" onclick="SaveARole('admin')">
@@ -215,6 +217,17 @@
       </div>
     </div>
   </div>
+  <dialog id="UpdateConcern" style="z-index: 999999">
+    <div id="dialogHeaderUpdateConcern">
+      Save Changes
+    </div>
+    <div id="dialogContentUpdateConcern">
+      Complete this Dispute/Concern
+    </div>
+    <div id="dialogFooterUpdateConcern">
+      <button></button>
+    </div>
+  </dialog>
 </body>
 <dialog id="dialog" style="position: absolute; top: 50%; background-color: grey;">
   <div id="LoaderTitle" style="color: white">Loading Data</div>
@@ -225,6 +238,7 @@
     <p></p>
   </div>
 </dialog>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <script src="https://dcps-core-api-dev.azurewebsites.net/scriptlibrary/jrapi.js"></script>    
 <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.js"></script>
@@ -234,7 +248,6 @@
 <script src="script/data.js"></script>
 <script src="script/datatable.js"></script>
 <script src="script/settings.js"></script>
-<script src="script/dd-upload.js"></script>
 <script src="script/dragdrop.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 

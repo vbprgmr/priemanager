@@ -5,6 +5,9 @@ function ShowSettingsModal(){
 }
 
 function ShowSettings(type){
+    $('#AdminEntry').hide();
+    $('#SchoolEntry').hide();
+
     if (type === "admin"){
         $('#dataTableAdminWrapper').show();
         BuildRoleTable("dataTableAdmin", "admin");         
@@ -13,12 +16,7 @@ function ShowSettings(type){
     }
 }
 
-function SettingsAddRole(type){
-    //https://dcps-core-api-dev.azurewebsites.net/api/prie/peoplepicker?search=bar
-    
-    
-    let theHTML = "";
-    
+function SettingsAddRole(type){ 
     if (type === "admin"){
         $('#dataTableAdminWrapper').hide();
         ResetPeoplePicker($('#searchPeoplePickerAdmin'));
@@ -29,11 +27,7 @@ function SettingsAddRole(type){
         ResetPeoplePicker($('#searchPeoplePickerSchool'));
         GetSearchPeoplePicker('School','0');
         $('#SchoolEntry').show();
-    }
-
-    // CallJrapiPRIE("get", null, null, null, null).done(function (data) {
-    //     console.log(data);
-    // });    
+    } 
 }
 
 function BackSettingsModal(type, redraw){
@@ -77,7 +71,6 @@ function GetSearchPeoplePicker(type, id) {
                         item: item
                     });
                 });
-
 
                 return response;
             }
@@ -123,6 +116,8 @@ function SaveARole(type){
             postObject.Role = "Admin";
         } else if ($('#flexRadioChief').is(':checked')){
             postObject.Role = "Chief";
+        }else if ($('#flexRadioCharterOffice').is(':checked')){
+            postObject.Role = "CharterOffice";
         }
         
     } else if (type === "school"){        

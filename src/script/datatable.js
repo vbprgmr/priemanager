@@ -65,7 +65,7 @@ function SetButtonState(type, first, previous, next, last, paging) {
     }
 }
 
-function dataTableConcernSort(obj) {
+function dataTableConcernSort(obj, reload) {
     var thePlaceholder = "Search " + obj.text;
     var dataValue, datafField;
 
@@ -113,15 +113,18 @@ function dataTableConcernSort(obj) {
         $('#iSearchValue').addClass("fa-sort-numeric-down-alt").removeClass("fa-sort-numeric-down").removeClass("fa-sort-alpha-down").removeClass("fa-sort-alpha-down-alt");
     }
 
-    ReloadConcernTable(true);
+    if (reload){
+        ReloadConcernTable(true);
+    }    
 }
 
 function BuildConcernTable(pIndex, pSize, id) {
     var order;
+    showInProgressDialog("Please wait...", "Loading Concern List");
 
-    
-
-
+    if ($("#SearchConcern").html() === "Search"){
+        dataTableConcernSort(document.getElementById('chkId'), false);
+    };
 
     if ($('#iSearchValue').hasClass("fa-sort-numeric-down") | $('#iSearchValue').hasClass("fa-sort-alpha-down")) {
         order = "asc";
@@ -129,31 +132,39 @@ function BuildConcernTable(pIndex, pSize, id) {
         order = "desc";
     }
 
+    var searchVal = "";
 
-
-
-    var searchVal = $.trim($("#searchValConcern").val());
+    if ($.trim($("#searchValConcern").val()) === "") {
+        searchVal = "";
+    } else {
+        searchVal = "!LookUp($.Object.Id -like '%" + $.trim($("#searchValConcern").val()) + "%')";
+    }
 
     $("#btnConcernFirst").prop('disabled', true);
     $("#btnConcernPrevious").prop('disabled', true);
     $("#btnConcernNext").prop('disabled', true);
     $("#btnConcernLast").prop('disabled', true);
-
-    //$('#overConcernTable').hide();
     $('#ConcernNavigation').hide();
     $('#underConcernTable').hide();
 
     var url = "";
 
-    url = jrapiAPISource + "disputes?startindex=" + pIndex + "&PageSize=" + pSize;// + "?where=" + searchVal + "&sort=";
-    
-    console.log(url)
+    url = jrapiAPISource + "disputes" + "?Where=" + encodeURI(searchVal) + "&StartIndex=" + pIndex + "&PageSize=" + pSize;
+
+    console.log(url);
 
     if ($.fn.dataTable.isDataTable('#dataTableConcern')) {
         ReloadConcernTable(false);        
     }
 
     table = $('#dataTableConcern').DataTable({
+        "initComplete": function(settings, json) {
+            if (getParameterByName('action', false) === "NewDisputeNotification"){
+                let id = getParameterByName('disputeId', false);
+    
+                $('#' + id + ' td:first-child').click();
+            }
+        },
         dom: '',
         paging: false,
         ordering: false,
@@ -166,7 +177,8 @@ function BuildConcernTable(pIndex, pSize, id) {
                 "token": JRTKN
             },
             "dataSrc": "Items"
-        }, 
+        },
+        "rowId": 'Id', 
         "columns": [
             {
                 "className": 'details-control',
@@ -257,11 +269,6 @@ function BuildConcernTable(pIndex, pSize, id) {
         })
         .on('xhr.dt', function (e, settings, json, xhr) {
             closeInProgressDialog();
-
-            if ($("#SearchConcern").html() === "Search Status"){
-                $('#chkId').click();
-            };
-            //AdjustConcernSort()
 
             $('#underConcernTable').show();
 
@@ -375,7 +382,7 @@ function BuildConcernTable(pIndex, pSize, id) {
                             
                             if (d.DaysRemaining > 0 & d.Status.toLowerCase() !== "completed"){  
 
-                                theHTML += `<button class="ui primary button" onclick="SaveResolution('` + d.Id + `')">
+                                theHTML += `<button class="ui primary button" onclick="Confirm('Save Changes?', 'Dispute/Concern ` + d.Id + `', 'Confirm', 'Cancel', 'saveresponse', 'school', '` + d.Id + `')">
                                                 Save
                                             </button>&nbsp;`;
                             }
@@ -520,8 +527,26 @@ function GetConcernInfo(id){
             </div>
           </div>                 
         </div>
-      </div>
       </div>`;
+
+    if (data.HasGuardianFollowUp){
+      theHTML += `<div class="row" style="margin: 10px">
+        <div class="sixteen wide column">
+          <div>
+            Describe what was not resolved:
+          </div>
+          <div>
+            <div class="ui form">
+              <div class="field disabled">
+                <textarea id="UnresolvedDescription" rows="5" style="width: 95%">` + data.GuardianFollowUpNotes + `</textarea>
+              </div>
+            </div>
+          </div>                 
+        </div>
+      </div>`;
+    }
+
+      theHTML += `</div>`;
 
       $('#ConcernInfo' + id).append(theHTML);
      }); 
@@ -593,7 +618,7 @@ function ResolutionChange(id, type){
     }
 }
 
-function ReloadConcernTable(reset, flip) {
+function ReloadConcernTable(reset, flip, id) {
     var order;    
 
     if ($('#iSearchValue').hasClass("fa-sort-numeric-down") || $('#iSearchValue').hasClass("fa-sort-alpha-down")) {
@@ -631,7 +656,7 @@ function ReloadConcernTable(reset, flip) {
         pageIndexConcern = 0;
     }
 
-    showInProgressDialog("Please wait...", "Loading Concern Requests");
+    showInProgressDialog("Please wait...", "Loading Concern List");
 
     var url = jrapiAPISource + "disputes" + "?Where=" + encodeURI(searchVal) + "&Sort=" + encodeURI(fields) + " " + order + "&StartIndex=" + pageIndexConcern + "&PageSize=" + pageSizeConcern;
 
@@ -640,9 +665,13 @@ function ReloadConcernTable(reset, flip) {
     $('#underConcernTable').hide();
 
     console.log(url);
-
-    $('#dataTableConcern').DataTable().ajax.url(url).load();
-    //}
+    if (id !=="undefined"){
+        $('#dataTableConcern').DataTable().ajax.url(url).load(function( settings, json ) {
+            $('#' + id + ' td').click();
+          });  
+    } else {
+        $('#dataTableConcern').DataTable().ajax.url(url).load();  
+    }      
 }
 
 function GetRedFields(flip) {
@@ -767,7 +796,6 @@ function BuildRoleTable(tableId, type1) {
                 "data": null,
                 "orderable": false,
                 "render": function (data, type, row, meta) {
-
                     var theHTML = `<a href="javascript:void(0)" onclick="Confirm('Delete account', 'Click confirm to delete &quot;` + data.DisplayName + `&quot;?', 'Confirm', 'Cancel', 'deleteaccount', '` + type1 + `', '` + data.Id + `')"><img src="../image/trash.png" style="height: 20px; width: 20px"/></a>`;
 
                     return theHTML;
@@ -778,8 +806,19 @@ function BuildRoleTable(tableId, type1) {
                 "orderable": false,
             },
             {
-                "data": "Role",
+                "data": null,
                 "orderable": false,
+                "render": function (data, type, row, meta) {
+                    var theRole = "Admin";
+
+                    if (data.Role === "Chief"){
+                        theRole = "Chief of Schools (DCPS)";
+                    }else if (data.Role === "CharterOffice"){
+                        theRole = "Charter School Office";
+                    }
+                    
+                    return theRole;
+                }
             },
             {
                 "data": null,
