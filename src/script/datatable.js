@@ -419,10 +419,14 @@ function GetCompletionNotes(id){
 
 function GetConcernInfo(id){
     let theHTML = "";
+    let attempted = false;
 
     $('#ConcernInfo' + id).empty();
 
-    CallJrapiPRIE("concerninfo", id, null, null, null).done(function (data) {        
+    CallJrapiPRIE("concerninfo", id, null, null, null).done(function (data) {    
+        
+        attempted = data.HasGuardianFollowUp;
+
         theHTML = `<div class="ui grid">
         <div class="row" style="margin: 10px">
         <div class="eight wide column">
@@ -503,6 +507,20 @@ function GetConcernInfo(id){
       <div class="row" style="margin: 10px">
         <div class="sixteen wide column">
           <div>
+            Classify the nature of your dispute:
+          </div>
+          <div>
+            <div class="ui form">
+              <div class="field disabled">
+                <div id="DisputeNature" rows="5" style="width: 95%"></div>
+              </div>
+            </div>
+          </div>                 
+        </div>
+      </div>
+      <div class="row" style="margin: 10px">
+        <div class="sixteen wide column">
+          <div>
             Describe the dispute:
           </div>
           <div>
@@ -531,6 +549,20 @@ function GetConcernInfo(id){
 
     if (data.HasGuardianFollowUp){
       theHTML += `<div class="row" style="margin: 10px">
+      <div class="sixteen wide column">
+        <div>
+          Describe what was not resolved:
+        </div>
+        <div>
+          <div class="ui form">
+            <div class="field disabled">
+              As the parent or guardian, I have attempted to resolve the dispute with the School Principal. ` + attempted  + `
+            </div>
+          </div>
+        </div>                 
+      </div>
+    </div>
+    <div class="row" style="margin: 10px">
         <div class="sixteen wide column">
           <div>
             Describe what was not resolved:
@@ -549,9 +581,18 @@ function GetConcernInfo(id){
       theHTML += `</div>`;
 
       $('#ConcernInfo' + id).append(theHTML);
+
+      LoadNature(data.RequirementsVersion,data.RequirementsOption);
      }); 
 
      
+}
+function LoadNature(version, option){
+    let optionVal = option.toString();
+
+    CallJrapiPRIE("options", version, null, null, null).done(function (data) {    
+        $('#DisputeNature').text(data.Options[optionVal]);
+    });
 }
 
 function LoadAttachments(id){

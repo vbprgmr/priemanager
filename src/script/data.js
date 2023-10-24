@@ -18,6 +18,8 @@ function CallJrapiPRIE(endPoint, id1, id2, id3, id4, id5) {
         url = jrapiAPISource + 'completionnotes?id=' + id1;
     } else if (endPoint === "concerninfo") {
         url = jrapiAPISource + 'disputes?id=' + id1;
+    } else if (endPoint === "options") {
+        url = jrapiAPISource + 'Requirements/v' + id1 + '.json';
     } 
     
     console.log(verb + "   " + url);
