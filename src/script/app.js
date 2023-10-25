@@ -17,11 +17,11 @@ function ReadySetGo(type){
 
         console.log("winner winner chicken dinner!");         
         
-        //if (getParameterByName('action', false) === "NewDisputeNotification"){
+        if (getParameterByName('action', false) === "NewDisputeNotification" || getParameterByName('action', false) === "DaysExceeded"){
             let id = getParameterByName('disputeId', false);
 
             $('#searchValConcern').val(id);
-        //}
+        }
 
         $('.menu .item').tab();
 
