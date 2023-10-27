@@ -17,7 +17,9 @@ function ReadySetGo(type){
 
         console.log("winner winner chicken dinner!");         
         
-        if (getParameterByName('action', false) === "NewDisputeNotification" || getParameterByName('action', false) === "DaysExceeded"){
+        let action = getParameterByName('action', false);
+        
+        if (action === "NewDisputeNotification" || action === "DaysExceeded" || action === "ExpiredGuardianFollowUp"){
             let id = getParameterByName('disputeId', false);
 
             $('#searchValConcern').val(id);
@@ -561,9 +563,9 @@ function SaveResponse(id, Complete){
     postObject.Id = id;
 
     if ($('#chkResolved' + id).is(':checked')){
-        postObject.CompletionResponse = "Resolved";
+        postObject.Response = "Resolved";
     } else{
-        postObject.CompletionResponse = "";
+        postObject.Response = "WillNotResolve";
     }
     
     postObject.Complete = Complete;
@@ -573,11 +575,6 @@ function SaveResponse(id, Complete){
     SaveJrapiPRIEManager("POST", jrapiAPISource + "submitresponse/", postObject, onSuccess, onFail, true, true);
 
     function onSuccess(data) {
-        //LoadAttachments(curId);
-
-        //GetCompletionNotes(curId);
-
-        //GetConcernInfo(curId);
         
         ReloadConcernTable(true, null, id);
         
@@ -586,8 +583,6 @@ function SaveResponse(id, Complete){
             showErrorModal(data);
             return;
         } 
-        
-        //showSuccessDialog("Success", "Your changes have been saved!");
     }
 
     function onFail(error) {

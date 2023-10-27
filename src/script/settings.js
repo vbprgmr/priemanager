@@ -68,7 +68,8 @@ function GetSearchPeoplePicker(type, id) {
                     
                     response.results.push({
                         title: item.DisplayName,
-                        item: item
+                        item: item,
+                        description: item.UPN
                     });
                 });
 

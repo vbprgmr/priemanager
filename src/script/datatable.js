@@ -159,7 +159,9 @@ function BuildConcernTable(pIndex, pSize, id) {
 
     table = $('#dataTableConcern').DataTable({
         "initComplete": function(settings, json) {
-            if (getParameterByName('action', false) === "NewDisputeNotification" || getParameterByName('action', false) === "DaysExceeded"){
+            let action = getParameterByName('action', false);
+            
+            if (action === "NewDisputeNotification" || action === "DaysExceeded" || action === "ExpiredGuardianFollowUp"){
                 let id = getParameterByName('disputeId', false);
     
                 $('#' + id + ' td:first-child').click();
