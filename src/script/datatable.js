@@ -265,7 +265,12 @@ function BuildConcernTable(pIndex, pSize, id) {
                 $('#ConcernNavigation').show();
                 $('#overConcernTable').show();
             }
-            $('#ConcernCount').text('Showing ' + x + ' thru ' + y + ' items');
+
+            if (y === 0){
+                $('#ConcernCount').text(y + ' items');
+            } else{
+                $('#ConcernCount').text('Showing ' + x + ' thru ' + y + ' items');
+            }            
 
             $("#ConcernTotalItems").text("Total: " + z);
         })
