@@ -250,6 +250,14 @@ function BuildConcernTable(pIndex, pSize, id) {
                         }  
                     }
                     
+                    if (diffDays === 'Completed'){
+                        var date = new Date(data.CompletionTimestampEST);
+
+                        var tmpStr = SimpleDate(date.toISOString());
+    
+                        diffDays += ' (' +  tmpStr + ')';
+                    }                    
+                    
                     return diffDays;                    
                 }
             }
