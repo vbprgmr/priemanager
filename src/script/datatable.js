@@ -219,9 +219,22 @@ function BuildConcernTable(pIndex, pSize, id) {
                 "data": null,
                 "orderable": false,
                 "render": function (data, type, row, meta) {
-                    let theStatus = "Pending";
+                    let theStatus = "New";
 
-                    if ("Response" in data){
+                    //New, Pending, Not Resolved, Resolved
+                    if (data.CurrentResponseLength > 0){
+                        if (data.Status === "Completed"){
+                            if (data.Response === "WillNotResolve"){
+                                theStatus = "Not Resolved";
+                            } else {
+                                theStatus = data.Response;
+                            }
+                        } else if (data.DaysRemaining > -91 ){
+                            theStatus = "Pending";
+                        } else if (data.DaysRemaining < -90 ){
+                            theStatus = "Not Resolved";
+                        }
+                    } else if ("Response" in data){
                         if (data.Response === "WillNotResolve"){
                             theStatus = "Not Resolved";
                         } else {
@@ -281,6 +294,11 @@ function BuildConcernTable(pIndex, pSize, id) {
             }            
 
             $("#ConcernTotalItems").text("Total: " + z);
+
+              
+            let theHTML =  "<a id='myStats' href='javascript:void(0)' onclick='GetStats()' style='float: left'>Stats</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + $('#ConcernTotalItems').text();
+            
+            $('#ConcernTotalItems').html(theHTML);            
         })
         .on('xhr.dt', function (e, settings, json, xhr) {
             closeInProgressDialog();
@@ -413,17 +431,34 @@ function BuildConcernTable(pIndex, pSize, id) {
     }
 }
 
-function ConcernPageClick(type, direction) {    
-        if (direction === "First") {
-            pageIndexConcern = 0;
-        } else if (direction === "Previous") {
-            pageIndexConcern = pageIndexConcern - pageSizeConcern;
-        } else if (direction === "Next") {
-            pageIndexConcern = pageIndexConcern + pageSizeConcern;
-        } else if (direction === "Last") {
-            pageIndexConcern = Math.ceil(totalItemsConcern / pageSizeConcern) * pageSizeConcern - pageSizeConcern;
-        }
-        ReloadConcernTable(false);    
+function GetStats(){
+    let total = 0;
+
+    CallJrapiPRIE("stats", null, null, null, null).done(function (data) {  
+        $('#StatNew').text(data.TotalNew);
+        $('#StatPending').text(data.TotalPending);
+        $('#StatCompleted').text(data.TotalCompleted);
+        $('#StatExpired').text(data.TotalExpired);
+
+        total = data.TotalNew + data.TotalPending + data.TotalCompleted + data.TotalExpired;
+
+        $('#StatTotal').text(total);
+    }); 
+
+    $('#StatsModal').modal('show');
+}
+
+function ConcernPageClick(type, direction) {
+    if (direction === "First") {
+        pageIndexConcern = 0;
+    } else if (direction === "Previous") {
+        pageIndexConcern = pageIndexConcern - pageSizeConcern;
+    } else if (direction === "Next") {
+        pageIndexConcern = pageIndexConcern + pageSizeConcern;
+    } else if (direction === "Last") {
+        pageIndexConcern = Math.ceil(totalItemsConcern / pageSizeConcern) * pageSizeConcern - pageSizeConcern;
+    }
+    ReloadConcernTable(false);    
 }
 
 function GetCompletionNotes(id){

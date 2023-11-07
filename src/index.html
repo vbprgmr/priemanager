@@ -56,7 +56,7 @@
                                     <option>25</option>
                                     <option>50</option>
                                     <option>100</option>
-                                </select> entries 
+                                </select> entries
                         </div>
                         <div class="nine wide column" style="display: flex">
                             <a href="#" onclick="AdjustConcernSort()"><i style="display: block; line-height: normal;color: red" id="iSearchValue" class="fas fa-lg"></i></a>&nbsp;&nbsp;
@@ -228,6 +228,41 @@
       <button></button>
     </div>
   </dialog>
+  <!-- Modal -->
+  <div class="ui tiny modal" id="StatsModal">
+    <i class="close icon"></i>
+    <div class="header">
+      Stats Info
+    </div>
+    <div class="content" style="height: auto; max-height: 180px; overflow-y: auto;">
+      <div class="ui labels" style="text-align: center;">
+        <a class="ui blue label">
+          New
+          <div id="StatNew" class="detail"></div>
+        </a>
+        <a class="ui blue label">
+          Pending
+          <div id="StatPending" class="detail"></div>
+        </a>
+        <a class="ui blue label">
+          Completed
+          <div id="StatCompleted" class="detail"></div>
+        </a>
+        <a class="ui blue label">
+          Expired
+          <div id="StatExpired" class="detail"></div>
+        </a>
+        <a class="ui grey label">
+          Total
+          <div id="StatTotal" class="detail"></div>
+        </a>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="ui button">Cancel</div>
+    </div>
+  </div>
+  <!-- Modal -->
 </body>
 <dialog id="dialog" style="position: absolute; top: 50%; background-color: grey;">
   <div id="LoaderTitle" style="color: white">Loading Data</div>
