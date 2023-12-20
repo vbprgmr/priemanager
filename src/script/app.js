@@ -25,7 +25,17 @@ function ReadySetGo(type){
             $('#searchValConcern').val(id);
         }
 
-        $('.menu .item').tab();
+        $('.menu .item').tab();        
+
+
+        $('#StatFromDate').on('change', function (e) {
+            GetStatSchool();
+        });
+
+        $('#StatToDate').on('change', function (e) {
+            GetStatSchool();
+        });
+
 
         BuildConcernTable(0, 10, null);
     }
@@ -652,5 +662,77 @@ function Confirm(title, msg, $true, $false, $link, $Id1, $Id) { /*change*/
    };
    
 
+   function LoadStatSchools(SchoolIds) {
+    let theHTML = "";
 
+    $("#select2StatSchools").empty();
+
+    theHTML = `<option value="All">All Schools</option>`;
+    
+    $("#select2StatSchools").append(theHTML);            
+
+    CallJrapiPRIE("schools", null, null, null, null).done(function (data) { 
+        $.each(data, function (key, value) {
+            theHTML = `<option value="` + value.Id + `">` + value.Name + `</option>`;
+    
+            if ($("#select2StatSchools option[value='" + value.Id + "']").length === 0) {
+                $("#select2StatSchools").append(theHTML);
+            }
+    
+            if (key === data.length - 1) {
+                $('#select2StatSchools').select2();                
+            }
+        });
+    });    
+}
+
+function GetStatSchool(){
+    let id = $('#select2StatSchools').val();
+
+    let dFrom = new Date($('#StatFromDate').val());
+    let dTo = new Date($('#StatToDate').val());
+
+    dFrom.setHours(0,0,0,1);
+    dTo.setHours(23,59,59,999);
+
+    let newFrom = new Date(dFrom.getTime() - (dFrom.getTimezoneOffset() * 60000)).toISOString();
+    let newTo = new Date(dTo.getTime() - (dTo.getTimezoneOffset() * 60000)).toISOString();
+
+    if (id === "All"){
+        GetStats(false);
+        return;
+    }
+
+    let total = 0;
+
+    $('#StatNew').text('0');
+    $('#StatPending').text('0');
+    $('#StatCompleted').text('0');
+    $('#StatExpired').text('0');
+
+    CallJrapiPRIE("stats", newFrom, newTo, null, null).done(function (data) {
+        console.log(data.Stats);
+        $.each(data.Stats, function (key, val){
+            if (val.SchoolId.toString() === id){
+                if (val.Status === "New"){
+                    $('#StatNew').text(val.Count);
+                    total += val.Count;
+                } else if (val.Status === "Pending"){
+                    $('#StatPending').text(val.Count);
+                    total += val.Count;
+                } else if (val.Status === "Completed"){
+                    $('#StatCompleted').text(val.Count);
+                    total += val.Count;
+                } else if (val.Status === "Expired"){
+                    $('#StatExpired').text(val.Count);
+                    total += val.Count;
+                }
+            } 
+
+            if (key + 1 === data.Stats.length){
+                $('#StatTotal').text(total);
+            }
+        });
+    }); 
+}
 

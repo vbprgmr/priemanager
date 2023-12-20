@@ -296,7 +296,7 @@ function BuildConcernTable(pIndex, pSize, id) {
             $("#ConcernTotalItems").text("Total: " + z);
 
               
-            let theHTML =  "<a id='myStats' href='javascript:void(0)' onclick='GetStats()' style='float: left'>Stats</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + $('#ConcernTotalItems').text();
+            let theHTML =  "<a id='myStats' href='javascript:void(0)' onclick='GetStats(true)' style='float: left'>Stats</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + $('#ConcernTotalItems').text();
             
             $('#ConcernTotalItems').html(theHTML);            
         })
@@ -399,7 +399,7 @@ function BuildConcernTable(pIndex, pSize, id) {
                         </div>
                         <div id="drop-area` + d.Id + `" class="droparea">
                             <form class="my-form">
-                                <p>Upload multiple files with the 'Select Files' dialog or by dragging and dropping images onto the dashed region</p>
+                                <p>Upload multiple files with the 'Select Files' dialog or by dragging and dropping onto the dashed region</p>
                                 <div class="row">
                                     <div class="eight wide column" style="text-align: ">                                        
                                         <input type="file" id="fileElem` + d.Id + `" class="fileElem" multiple accept="image/*" onchange="handleFiles(this.files, '` + d.Id + `')">
@@ -431,10 +431,28 @@ function BuildConcernTable(pIndex, pSize, id) {
     }
 }
 
-function GetStats(){
-    let total = 0;
+function GetStats(init){
+    let total = 0;    
 
-    CallJrapiPRIE("stats", null, null, null, null).done(function (data) {  
+    let date = new Date();
+
+    if (init){
+        $('#StatFromDate').flatpickr({dateFormat: "m-d-Y", minDate: "07-01-2023", defaultDate: "07-01-2023"});
+        $('#StatToDate').flatpickr({dateFormat: "m-d-Y", maxDate: "today", defaultDate: (date.getMonth() + 1) + "=" + date.getDate() + "-" + date.getFullYear()});
+    }    
+
+    let dFrom = new Date($('#StatFromDate').val());
+    let dTo = new Date($('#StatToDate').val());
+
+    dFrom.setHours(0,0,0,1);
+    dTo.setHours(23,59,59,999);
+
+    let newFrom = new Date(dFrom.getTime() - (dFrom.getTimezoneOffset() * 60000)).toISOString();
+    let newTo = new Date(dTo.getTime() - (dTo.getTimezoneOffset() * 60000)).toISOString();
+
+    CallJrapiPRIE("stats", newFrom, newTo, null, null).done(function (data) {
+        LoadStatSchools(data.Stats);
+        
         $('#StatNew').text(data.TotalNew);
         $('#StatPending').text(data.TotalPending);
         $('#StatCompleted').text(data.TotalCompleted);
@@ -444,7 +462,7 @@ function GetStats(){
 
         $('#StatTotal').text(total);
     }); 
-
+  
     $('#StatsModal').modal('show');
 }
 

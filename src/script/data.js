@@ -21,7 +21,7 @@ function CallJrapiPRIE(endPoint, id1, id2, id3, id4, id5) {
     } else if (endPoint === "options") {
         url = jrapiAPISource + 'Requirements/v' + id1 + '.json';
     } else if (endPoint === "stats") {
-        url = jrapiAPISource + 'stats';
+        url = jrapiAPISource + 'stats?start=' + id1 + '&end=' + id2;
     } 
     
     console.log(verb + "   " + url);
